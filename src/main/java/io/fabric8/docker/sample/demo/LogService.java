@@ -1,9 +1,9 @@
 package io.fabric8.docker.sample.demo;
 
 import java.io.*;
-import java.sql.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -35,9 +35,7 @@ public class LogService extends HttpServlet {
 
     // Log into DB and print out all logs.
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try (Connection connection = DriverManager.getConnection(getConnectionUrl(),
-                                                                 "postgres",
-                                                                 null)) {
+        try (Connection connection = ConnectionManager.makeConnection()) {
             // Insert current request in DB ...
             insertLog(req, connection);
 
@@ -54,7 +52,7 @@ public class LogService extends HttpServlet {
     // Init DB and create table if required
     public LogService() throws SQLException {
         Flyway flyway = new Flyway();
-        flyway.setDataSource(getConnectionUrl(), "postgres", null);
+        flyway.setDataSource(ConnectionManager.getConnectionUrl(), "postgres", null);
         flyway.migrate();
     }
 
@@ -62,45 +60,25 @@ public class LogService extends HttpServlet {
     // ===================================================================================
     // Helper methods
 
-    // Extract connection URL from environment variable as setup by docker (or manually)
-    private String getConnectionUrl() {
-        String dbPort = System.getenv("DB_PORT");
-
-        // Fallback for alexec Plugin which does not support configuration of link aliases
-        if (dbPort == null) {
-            dbPort = System.getenv("SHOOTOUT_DOCKER_MAVEN_DB_PORT");
-        }
-        if (dbPort == null) {
-            throw new IllegalArgumentException("No DB_PORT or SHOOTOUT_DOCKER_MAVEN_DB_PORT environment variable set. Please check you docker link parameters.");
-        }
-        Pattern pattern = Pattern.compile("^[^/]*//(.*)");
-        Matcher matcher = pattern.matcher(dbPort);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Invalid format of DB_PORT variable: Expected tcp://host:port and not " + dbPort);
-        }
-        String hostAndPort = matcher.group(1);
-        return "jdbc:postgresql://" + hostAndPort + "/postgres";
-    }
-
     private void printOutLogs(Connection connection, PrintWriter out) throws SQLException {
-        Statement select = connection.createStatement();
-        ResultSet result = select.executeQuery("SELECT * FROM LOGGING ORDER BY DATE ASC");
-        while (result.next()) {
-            Timestamp date = result.getTimestamp("DATE");
-            String ip = result.getString("IP");
-            String url = result.getString("URL");
-            out.println(date + "\t\t" + ip + "\t\t" + url);
-        }
+
+        LogDao dao = new LogDaoJdbc(connection);
+        dao.listLogs().stream()
+                .map(l -> String.format("%s\t\t%s\t\t%s", l.timestamp, l.remoteAddress, l.requestURI))
+                .forEach(out::println);
+
     }
 
     private void insertLog(HttpServletRequest req, Connection connection) throws SQLException {
-        try (PreparedStatement stmt =
-                     connection.prepareStatement("INSERT INTO LOGGING (date,ip,url) VALUES (?,?,?)")) {
-            stmt.setTimestamp(1, new Timestamp((new java.util.Date()).getTime()));
-            stmt.setString(2, req.getRemoteAddr());
-            stmt.setString(3, req.getRequestURI());
-            stmt.executeUpdate();
-        }
+
+        LogDao dao = new LogDaoJdbc(connection);
+        dao.insertLog(
+                new LogEntry(
+                        new Date(),
+                        req.getRemoteAddr(),
+                        req.getRequestURI()
+                )
+        );
     }
 
 
