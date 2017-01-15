@@ -1,7 +1,6 @@
 package com.github.mgurov.jdbcplayground;
 
 import java.io.*;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -13,12 +12,6 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.flywaydb.core.Flyway;
 
-/**
- * Popup Tomcat, migrate DB and start LogService
- *
- * @author roland
- * @since 08.08.14
- */
 public class LogService extends HttpServlet {
 
     // Fireup tomcat and register this servlet
@@ -33,20 +26,17 @@ public class LogService extends HttpServlet {
         tomcat.getServer().await();
     }
 
+    private final LogDao dao = new LogDaoJdbc(ConnectionManager.makeDatasource());
+
+
     // Log into DB and print out all logs.
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try (Connection connection = ConnectionManager.makeConnection()) {
-            // Insert current request in DB ...
-            insertLog(req, connection);
+        insertLog(req);
 
-            // ... and then return all logs stored so far
-            resp.setContentType("text/plain");
-            PrintWriter out = resp.getWriter();
-            printOutLogs(connection, out);
-
-        } catch (SQLException e) {
-            throw new ServletException("Cannot update DB: " + e,e);
-        }
+        // ... and then return all logs stored so far
+        resp.setContentType("text/plain");
+        PrintWriter out = resp.getWriter();
+        printOutLogs(out);
     }
 
     // Init DB and create table if required
@@ -57,21 +47,14 @@ public class LogService extends HttpServlet {
     }
 
 
-    // ===================================================================================
-    // Helper methods
-
-    private void printOutLogs(Connection connection, PrintWriter out) throws SQLException {
-
-        LogDao dao = new LogDaoJdbc(connection);
+    private void printOutLogs(PrintWriter out) {
         dao.listLogs().stream()
                 .map(l -> String.format("%s\t\t%s\t\t%s", l.timestamp, l.remoteAddress, l.requestURI))
                 .forEach(out::println);
 
     }
 
-    private void insertLog(HttpServletRequest req, Connection connection) throws SQLException {
-
-        LogDao dao = new LogDaoJdbc(connection);
+    private void insertLog(HttpServletRequest req) {
         dao.insertLog(
                 new LogEntry(
                         new Date(),

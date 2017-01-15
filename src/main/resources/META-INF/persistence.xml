@@ -5,26 +5,7 @@
     <persistence-unit name="TEST" transaction-type="RESOURCE_LOCAL">
         <!-- Persistence provider -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-
         <!-- Entity classes -->
         <class>com.github.mgurov.jdbcplayground.LogEntry</class>
-
-        <properties>
-            <!-- The JDBC URL to the database instance -->
-            <!-- TODO: programmatic -->
-            <property name="javax.persistence.jdbc.url"
-                      value="jdbc:postgresql://localhost:5432/postgres" />
-
-            <!-- The database username -->
-            <property name="javax.persistence.jdbc.user" value="postgres" />
-
-            <property name="hibernate.show_sql" value="true" />
-            <property name="hibernate.format_sql" value="true" />
-
-            <!-- The database password -->
-            <!--<property name="javax.persistence.jdbc.password" value="root" />-->
-
-            <!--<property name="hibernate.hbm2ddl.auto" value="create-drop" />-->
-        </properties>
     </persistence-unit>
 </persistence>

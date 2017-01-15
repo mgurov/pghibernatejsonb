@@ -1,15 +1,23 @@
 package com.github.mgurov.jdbcplayground;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class LogDaoHiberJpa implements LogDao {
 
     private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
-            .createEntityManagerFactory("TEST");
+            .createEntityManagerFactory("TEST", emOverrides());
 
-    public LogDaoHiberJpa() {
+    private static Map emOverrides() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("javax.persistence.jdbc.url", ConnectionManager.getConnectionUrl());
+        result.put("javax.persistence.jdbc.user", ConnectionManager.PGUSER);
+        result.put("hibernate.show_sql", true);
+        result.put("hibernate.format_sql", true);
+        return result;
     }
 
     @Override

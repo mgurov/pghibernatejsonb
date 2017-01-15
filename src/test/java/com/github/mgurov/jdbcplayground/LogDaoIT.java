@@ -1,6 +1,5 @@
 package com.github.mgurov.jdbcplayground;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -9,8 +8,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore // should either run from inside the container or get the port somehow
-public class LogDaoIT {
+/**
+ * Test talking directly to a postgress database
+ */
+public abstract class LogDaoIT {
 
     @Test
     public void insertion() {
@@ -34,10 +35,6 @@ public class LogDaoIT {
         assertEquals(Collections.singletonList(saved), read);
     }
 
-    private LogDao dao() {
-        //return new LogDaoJdbc(ConnectionManager.makeConnection());
-        //return new LogDaoSpringJdbc(ConnectionManager.makeDatasource());
-        return new LogDaoHiberJpa();
-    }
+    protected abstract LogDao dao();
 
 }

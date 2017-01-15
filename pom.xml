@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.fabric8</groupId>
-  <artifactId>shootout-docker-maven</artifactId>
+  <groupId>noname</groupId>
+  <artifactId>jdbcplayground</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
@@ -105,6 +105,9 @@
               <alias>db</alias>
               <name>postgres:9.5</name>
               <run>
+                <ports>
+                  <port>db.port:5432</port>
+                </ports>
                 <env>
                   <PGDATA>/tmp</PGDATA>
                 </env>
@@ -240,6 +243,9 @@
           </execution>
         </executions>
         <configuration>
+          <environmentVariables>
+            <DB_PORT>tcp://${docker.host.address}:${db.port}</DB_PORT>
+          </environmentVariables>
           <systemPropertyVariables>
             <jolokia.url>http://localhost:${tomcat.port}/jolokia</jolokia.url>
             <jolokia.version>${jolokia.version}</jolokia.version>

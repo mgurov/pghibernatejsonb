@@ -1,9 +1,9 @@
 package com.github.mgurov.jdbcplayground;
 
-
 import com.google.gson.Gson;
 import org.postgresql.util.PGobject;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +11,17 @@ import java.util.List;
 import java.util.Map;
 
 public class LogDaoJdbc implements LogDao {
-    private final Connection connection;
+    private final DataSource dataSource;
 
-    public LogDaoJdbc(Connection connection) {
-        this.connection = connection;
+    public LogDaoJdbc(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
     public void insertLog(LogEntry logEntry) {
         try {
-            try (PreparedStatement stmt =
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement stmt =
                          connection.prepareStatement("INSERT INTO LOGGING (date, data) VALUES (?, ?)")) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("remoteAddr", logEntry.remoteAddress);
@@ -44,6 +45,7 @@ public class LogDaoJdbc implements LogDao {
 
             List<LogEntry> r = new ArrayList<>();
             try (
+                    Connection connection = dataSource.getConnection();
                     Statement select = connection.createStatement();
                     ResultSet result = select.executeQuery("SELECT * FROM LOGGING ORDER BY DATE ASC");
             ) {
@@ -53,8 +55,8 @@ public class LogDaoJdbc implements LogDao {
                     r.add(
                             new LogEntry(
                                     new java.util.Date(date.getTime()),
-                                    data.get("remoteAddr").toString(),
-                                    data.get("requestURI").toString()))
+                                    data.get("remoteAddr") + "",
+                                    data.get("requestURI") + ""))
                     ;
                 }
             }
@@ -71,7 +73,8 @@ public class LogDaoJdbc implements LogDao {
     @Override
     public void clearAll() {
         try {
-            try (PreparedStatement stmt =
+            try (Connection connection = dataSource.getConnection();
+                    PreparedStatement stmt =
                          connection.prepareStatement("DELETE FROM LOGGING")) {
                 stmt.executeUpdate();
             }

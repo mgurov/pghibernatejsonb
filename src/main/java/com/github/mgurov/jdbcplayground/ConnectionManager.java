@@ -3,13 +3,13 @@ package com.github.mgurov.jdbcplayground;
 import org.postgresql.jdbc2.optional.SimpleDataSource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ConnectionManager {
+
+    public static final String PGUSER = "postgres";
+
     // Extract connection URL from environment variable as setup by docker (or manually)
     public static String getConnectionUrl() {
         String dbPort = System.getenv("DB_PORT");
@@ -30,20 +30,10 @@ public class ConnectionManager {
         return "jdbc:postgresql://" + hostAndPort + "/postgres";
     }
 
-    public static Connection makeConnection() {
-        try {
-            return DriverManager.getConnection(getConnectionUrl(),
-                                                                     "postgres",
-                                                                     null);
-        } catch (SQLException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
     public static DataSource makeDatasource() {
         SimpleDataSource ds = new SimpleDataSource();
         ds.setUrl(getConnectionUrl());
-        ds.setUser("postgres");
+        ds.setUser(PGUSER);
         return ds;
     }
 }

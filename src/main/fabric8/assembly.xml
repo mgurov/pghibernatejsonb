@@ -6,7 +6,7 @@
     <dependencySet>
       <useProjectArtifact>true</useProjectArtifact>
       <includes>
-        <include>io.fabric8:shootout-docker-maven</include>
+        <include>noname:jdbcplayground</include>
       </includes>
       <outputDirectory>.</outputDirectory>
       <outputFileNameMapping>shootout-docker-maven-fabric8.jar</outputFileNameMapping>
