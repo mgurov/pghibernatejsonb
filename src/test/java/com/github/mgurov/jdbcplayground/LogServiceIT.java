@@ -1,4 +1,4 @@
-package io.fabric8.maven.docker.sample.jolokia;
+package com.github.mgurov.jdbcplayground;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

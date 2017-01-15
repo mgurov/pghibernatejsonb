@@ -1,9 +1,7 @@
-package io.fabric8.maven.docker.sample.jolokia;
+package com.github.mgurov.jdbcplayground;
 
-import io.fabric8.docker.sample.demo.*;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.postgresql.jdbc2.optional.SimpleDataSource;
 
 import java.util.Collections;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package io.fabric8.docker.sample.demo;
+package com.github.mgurov.jdbcplayground;
 
 import javax.persistence.*;
 import java.util.List;

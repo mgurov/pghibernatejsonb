@@ -7,7 +7,7 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- Entity classes -->
-        <class>io.fabric8.docker.sample.demo.LogEntry</class>
+        <class>com.github.mgurov.jdbcplayground.LogEntry</class>
 
         <properties>
             <!-- The JDBC URL to the database instance -->

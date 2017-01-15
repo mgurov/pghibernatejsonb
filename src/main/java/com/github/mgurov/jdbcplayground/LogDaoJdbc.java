@@ -1,4 +1,4 @@
-package io.fabric8.docker.sample.demo;
+package com.github.mgurov.jdbcplayground;
 
 
 import com.google.gson.Gson;
