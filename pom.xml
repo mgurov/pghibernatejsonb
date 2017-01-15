@@ -36,6 +36,7 @@
 
   <properties>
     <tomcat.version>7.0.55</tomcat.version>
+    <hibernate.version>5.2.6.Final</hibernate.version>
 
     <!--  Current versions as of 2016-2-26: -->
     <docker.maven.plugin.fabric8.version>0.14.1</docker.maven.plugin.fabric8.version>
@@ -470,13 +471,13 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>5.2.5.Final</version>
+      <version>${hibernate.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>5.2.5.Final</version>
+      <version>${hibernate.version}</version>
     </dependency>
 
 <!--
