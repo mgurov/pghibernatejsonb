@@ -10,7 +10,6 @@ import javax.servlet.http.*;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
-import org.flywaydb.core.Flyway;
 
 public class LogService extends HttpServlet {
 
@@ -37,13 +36,6 @@ public class LogService extends HttpServlet {
         resp.setContentType("text/plain");
         PrintWriter out = resp.getWriter();
         printOutLogs(out);
-    }
-
-    // Init DB and create table if required
-    public LogService() throws SQLException {
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(ConnectionManager.getConnectionUrl(), "postgres", null);
-        flyway.migrate();
     }
 
 
