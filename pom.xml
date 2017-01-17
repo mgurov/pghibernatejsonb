@@ -121,59 +121,6 @@
                 </log>
               </run>
             </image>
-
-            <!-- Image holding the artifact of this build -->
-            <image>
-              <!-- Alias name which can used for linking containers during runtime -->
-              <alias>service</alias>
-              <name>fabric8/${project.artifactId}-fabric8:${project.version}</name>
-
-              <!-- ....................................... -->
-              <!-- Build configuration for creating images -->
-              <!-- ....................................... -->
-              <build>
-                <from>java:8u40</from>
-                <!-- Assembly descriptor holds the reference to the created artifact-->
-                <assembly>
-                  <!-- Normally, one would only use 'assembly.xml' if we could put the assembly descriptor
-                       into src/main/docker But this confuses the alexec plugin, so we put it into another
-                       directory and use an absolute pathe -->
-                  <descriptor>${basedir}/src/main/fabric8/assembly.xml</descriptor>
-                </assembly>
-                <!-- Expose ports -->
-                <ports>
-                  <port>8080</port>
-                </ports>
-                <!-- Default command for the build image -->
-                <cmd>java -Djava.security.egd=file:/dev/./urandom -jar /maven/shootout-docker-maven-fabric8.jar</cmd>
-              </build>
-
-              <!-- ............................................................... -->
-              <!-- Runtime configuration for starting/stopping/linking containers -->
-              <!-- ............................................................... -->
-              <run>
-                <!-- Assign dynamically mapped ports to maven variables (which can be reused in integration tests) -->
-                <ports>
-                  <port>tomcat.port:8080</port>
-                </ports>
-                <wait>
-                  <!-- Check for this URL to return a 200 return code .... -->
-                  <url>http://${docker.host.address}:${tomcat.port}/access</url>
-                  <!-- ... but at max 10 seconds -->
-                  <time>10000</time>
-                </wait>
-                <links>
-                  <!-- Links can be referenced via alias (db) or name (postgres:9). If no link-alias (second "db")
-                       is given it takes the first part (first "db") as link alias. So, <link>db</link> would be
-                       enough here -->
-                  <link>db:db</link>
-                </links>
-                <log>
-                  <prefix>TC</prefix>
-                  <color>cyan</color>
-                </log>
-              </run>
-            </image>
           </images>
         </configuration>
 
@@ -204,26 +151,6 @@
 
        The important thing is, that the artifact created by this build will be replaced with the fat-jar
        -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.github.mgurov.jdbcplayground.LogService</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
 
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
@@ -246,11 +173,6 @@
           <environmentVariables>
             <DB_PORT>tcp://${docker.host.address}:${db.port}</DB_PORT>
           </environmentVariables>
-          <systemPropertyVariables>
-            <jolokia.url>http://localhost:${tomcat.port}/jolokia</jolokia.url>
-            <jolokia.version>${jolokia.version}</jolokia.version>
-            <log.url>http://${docker.host.address}:${tomcat.port}/jolokia</log.url>
-          </systemPropertyVariables>
         </configuration>
       </plugin>
 
@@ -265,7 +187,7 @@
         </configuration>
       </plugin>
 
-      <!-- Need 1.8 -->
+      <!-- java 1.8 please -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
