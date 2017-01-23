@@ -6,31 +6,24 @@ import org.postgresql.jdbc2.optional.SimpleDataSource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 public class ConnectionManager {
 
-    public static final String PGUSER = "postgres";
-
-    // Extract connection URL from environment variable as setup by docker (or manually)
     public static String getConnectionUrl() {
-        String dbPort = System.getenv("DB_PORT");
+        Map<String, String> env = System.getenv();
+        String port = System.getProperty("postgres_port", env.getOrDefault("POSTGRES_PORT", "5432"));
+        String host = System.getProperty("postgres_host", env.getOrDefault("POSTGRES_HOST", "localhost"));
+        String db = System.getProperty("postgres_db", env.getOrDefault("POSTGRES_DB", "postgres"));
+        return String.format("jdbc:postgresql://%s:%d/%s", host, Integer.valueOf(port), db);
+    }
 
-        // Fallback for alexec Plugin which does not support configuration of link aliases
-        if (dbPort == null) {
-            dbPort = System.getenv("SHOOTOUT_DOCKER_MAVEN_DB_PORT");
-        }
-        if (dbPort == null) {
-            throw new IllegalArgumentException("No DB_PORT or SHOOTOUT_DOCKER_MAVEN_DB_PORT environment variable set. Please check you docker link parameters.");
-        }
-        Pattern pattern = Pattern.compile("^[^/]*//(.*)");
-        Matcher matcher = pattern.matcher(dbPort);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Invalid format of DB_PORT variable: Expected tcp://host:port and not " + dbPort);
-        }
-        String hostAndPort = matcher.group(1);
-        return "jdbc:postgresql://" + hostAndPort + "/postgres";
+    public static String getUser() {
+        return System.getProperty("postgres_user", System.getenv().getOrDefault("POSTGRES_USER", "postgres"));
+    }
+
+    public static String getPassword() {
+        return System.getProperty("postgres_password", System.getenv().get("POSTGRES_PASSWORD"));
     }
 
     // ensures db migrations has been applied before returning the connection url
@@ -41,7 +34,8 @@ public class ConnectionManager {
     public static SimpleDataSource makeDatasource() {
         SimpleDataSource ds = new SimpleDataSource();
         ds.setUrl(getConnectionUrl());
-        ds.setUser(PGUSER);
+        ds.setUser(getUser());
+        ds.setPassword(getPassword());
 
         applyDbMigrations(ds);
 
@@ -63,7 +57,7 @@ public class ConnectionManager {
                     return;
                 }
             } catch (SQLException e) {
-                System.out.printf("Failed to obtain connection: %s, retrying %d\n", e.getMessage(), i + 1);
+                System.out.printf("retry %d establishing connection: %s\n", i + 1, e.getMessage());
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e1) {
@@ -71,5 +65,6 @@ public class ConnectionManager {
                 }
             }
         }
+        throw new IllegalStateException("Could not establish connection with the database");
     }
 }

@@ -14,7 +14,8 @@ public class LogDaoHiberJpa implements LogDao {
     private static Map emOverrides() {
         HashMap<String, Object> result = new HashMap<>();
         result.put("javax.persistence.jdbc.url", ConnectionManager.getConnectionUrlPreparedDatabase());
-        result.put("javax.persistence.jdbc.user", ConnectionManager.PGUSER);
+        result.put("javax.persistence.jdbc.user", ConnectionManager.getUser());
+        result.put("javax.persistence.jdbc.password", ConnectionManager.getPassword());
         result.put("hibernate.show_sql", true);
         result.put("hibernate.format_sql", true);
         return result;

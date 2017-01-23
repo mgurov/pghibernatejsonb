@@ -171,7 +171,8 @@
         </executions>
         <configuration>
           <environmentVariables>
-            <DB_PORT>tcp://${docker.host.address}:${db.port}</DB_PORT>
+            <POSTGRES_HOST>${docker.host.address}</POSTGRES_HOST>
+            <POSTGRES_PORT>${db.port}</POSTGRES_PORT>
           </environmentVariables>
         </configuration>
       </plugin>
