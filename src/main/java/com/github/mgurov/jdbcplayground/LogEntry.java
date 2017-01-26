@@ -1,10 +1,8 @@
 package com.github.mgurov.jdbcplayground;
 
-import com.google.gson.Gson;
-import org.postgresql.util.PGobject;
+import com.github.mgurov.jdbcplayground.hibernate.StringMapToPgJsonbConverter;
 
 import javax.persistence.*;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,29 +41,6 @@ public class LogEntry {
     public void setData(Map<String, String> data) {
         remoteAddress = data.get("ip");
         requestURI = data.get("uri");
-    }
-
-    public static class StringMapToPgJsonbConverter implements AttributeConverter<Map, Object> {
-
-        @Override
-        public Object convertToDatabaseColumn(Map map) {
-            PGobject jsonB = new PGobject();//
-            try {
-                jsonB.setValue(gson.toJson(map));
-            } catch (SQLException e) {
-                throw Throwables.propagate(e);
-            }
-            jsonB.setType("jsonb");
-
-            return jsonB;
-        }
-
-        @Override
-        public Map convertToEntityAttribute(Object o) {
-            return gson.fromJson(o.toString(), Map.class);
-        }
-
-        private final Gson gson = new Gson();
     }
 
     @Override
