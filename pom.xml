@@ -7,7 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
-    <tomcat.version>7.0.55</tomcat.version>
+    <tomcat.version>7.0.91</tomcat.version>
     <hibernate.version>5.2.6.Final</hibernate.version>
 
     <!--  Current versions as of 2016-2-26: -->
